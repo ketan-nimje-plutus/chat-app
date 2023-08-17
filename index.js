@@ -26,12 +26,6 @@ app.use("/api/user", userRoutes);
 app.use("/api/message",messageRoutes);
 app.use("/public", express.static("public"));
 
-// app.use((err, req, res, next) => {
-//   if (err instanceof multer.MulterError) {
-//     console.log("error ouccer");
-//     return res.json({ error: "only png allow" });
-//   }
-// });
 
 const connectToDatabase = async () => {
   try {
@@ -47,38 +41,6 @@ const connectToDatabase = async () => {
 
 connectToDatabase();
 
-// const onlineUser = new Map();
-// let onlineUserArray = null;
-
-// io.on("connection", (socket) => {
-//   socket.on("add-user", (userID) => {
-//     if (!onlineUserArray?.includes(userID)) {
-//       onlineUser.set(userID, socket.id);
-//     } else {
-//       console.log("already added");
-//     }
-//     onlineUserArray = Array.from(onlineUser.keys());
-
-//     socket.emit("online-user", onlineUserArray);
-//     console.log("online user array", onlineUserArray);
-//     console.log("onlineUser",onlineUser)
-//   });
-
-//   socket.on("send-msg", (data) => {
-//     const receiverSocket = onlineUser.get(data.to);
-//     console.log("receiversocket", receiverSocket);
-//     if (receiverSocket) {
-//       socket.to(receiverSocket).emit("msg-recieve", data.message);
-//     }
-//   });
-//   socket.on("end", (data) => {
-
-//     onlineUser.delete(data)
-//     socket.emit("online-user", onlineUserArray);
-//     console.log("onlineUser after log out",onlineUser)
-//   });
-// });
-
 let onlineUser = [];
 io.on("connection", (socket) => {
   //add new user
@@ -92,32 +54,40 @@ io.on("connection", (socket) => {
       console.log("already added");
     }
     io.emit("online-user", onlineUser);
-    console.log("online user", onlineUser);
+   
   });
 
   //send message
   socket.on("send-msg", (data) => {
-    console.log("send-msg data", data);
     const receiver = data.to;
     const receiverSocket = onlineUser?.find((user) => user.userID == receiver);
-    console.log("online user", onlineUser);
-    console.log("receiverSocket", receiverSocket);
-    console.log("........", data.msg_type);
     if (receiverSocket) {
       // ssocket.to(receiverSocket.socketId).emit("msg-recieve", {to:receiverSocket.userID, message:data.message});
+     if(data.message) 
+     {
       io.to(receiverSocket.socketId).emit("msg-recieve", {
         message: data.message,
         to: data.from,
         msg_type: data.msg_type,
       });
+     }
+     else
+     {
+      io.to(receiverSocket.socketId).emit("msg-recieve", {
+        attechment: data.attechment,
+        to: data.from,
+        msg_type: data.msg_type,
+      });
+     }
+     
+
+
     }
   });
   //remove user
   socket.on("end-connection", () => {
-    console.log("socket.id", socket.id);
     onlineUser = onlineUser.filter((user) => user.socketId !== socket.id);
     io.emit("online-user", onlineUser);
-    console.log("online user after logout", onlineUser);
   });
 });
 

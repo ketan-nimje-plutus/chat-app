@@ -3,7 +3,6 @@ const messageModel = require("../Models/messageModel");
 const sendMessage = async (req, res) => {
   // const data = await messageModel.deleteMany();
   const { from, to, message, msg_type } = req.body;
-  console.log("sendMessage called", req.body);
   if (!from || !to) {
     return res.json({
       status: 0,
@@ -34,7 +33,6 @@ const sendMessage = async (req, res) => {
   }
 };
 const sendImage = async (req, res) => {
-  console.log("sendImage calleddd");
 
   const { from, to, msg_type } = req.body;
   if (!req.file) {
@@ -57,7 +55,6 @@ const sendImage = async (req, res) => {
       msg_type: msg_type,
     });
     if (data) {
-      console.log("data", data);
       return res.json({
         data: data.attechment,
         status: 1,
@@ -76,7 +73,6 @@ const sendImage = async (req, res) => {
 const getAllMessage = async (req, res) => {
   try {
     const { from, to } = req.body;
-    // console.log("from, to", from, to);
     const data = await messageModel.find({
       $or: [
         { $and: [{ to: to, from: from }] },

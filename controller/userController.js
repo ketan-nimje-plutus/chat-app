@@ -43,7 +43,6 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
 
-  console.log("email password", email, password);
   if (!email || !password) {
     return res.json({
       status: 0,
@@ -97,8 +96,6 @@ const getUser = async (req, res) => {
 
 const searchUser = async (req, res) => {
   const { search } = req.body;
-  console.log("requesr",req.body)
-  console.log("search",search);
   if(!search)
   {
     return res.json({
@@ -117,7 +114,6 @@ const searchUser = async (req, res) => {
     });
     if(data.length>0)
     {
-      console.log("data",data);
       return res.json({
         status: 1,
         user:data,
