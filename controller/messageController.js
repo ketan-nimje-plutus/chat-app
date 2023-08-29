@@ -32,8 +32,8 @@ const sendMessage = async (req, res) => {
     console.log(err);
   }
 };
-const sendImage = async (req, res) => {
 
+const sendImage = async (req, res) => {
   const { from, to, msg_type } = req.body;
   if (!req.file) {
     console.log("file require");
@@ -46,6 +46,7 @@ const sendImage = async (req, res) => {
       message: "all fields are require",
     });
   }
+
   try {
     const data = await messageModel.create({
       attechment: file,

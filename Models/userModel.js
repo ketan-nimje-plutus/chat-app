@@ -20,10 +20,16 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 2000,
     },
+    socketid: {
+      type: String,
+      required: false,
+      maxlength: 2000,
+    },
   },
   {
     timestamps: true,
-  }
+  },
+
 );
 const userModel = mongoose.model("User", userSchema);
 module.exports = userModel;

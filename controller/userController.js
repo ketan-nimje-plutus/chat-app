@@ -31,7 +31,7 @@ const register = async (req, res) => {
     });
   }
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new userModel({ name, email, password: hashedPassword });
+  const user = new userModel({ name, email, password: hashedPassword, socketid: '' });
   await user.save();
 
   res.json({
@@ -75,6 +75,7 @@ const login = async (req, res) => {
       email: existUser.email,
       password: existUser.password,
     };
+
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
 
     return res.json({
@@ -96,8 +97,7 @@ const getUser = async (req, res) => {
 
 const searchUser = async (req, res) => {
   const { search } = req.body;
-  if(!search)
-  {
+  if (!search) {
     return res.json({
       status: 0,
       message: "all fildes are required.",
@@ -107,32 +107,26 @@ const searchUser = async (req, res) => {
     const data = await userModel.find({
       $or: [
         {
-          name: { $regex: `^${search}`, $options: 'm' } ,
+          name: { $regex: `^${search}`, $options: 'm' },
         },
         { email: { $regex: `^${search}`, $options: 'm' } },
       ],
     });
-    if(data.length>0)
-    {
+    if (data.length > 0) {
       return res.json({
         status: 1,
-        user:data,
+        user: data,
         message: "search successfully.",
-        
       });
-    }
-    else
-    {
+    } else {
       return res.json({
         status: 0,
         message: "No result Found ",
       });
-
     }
   } catch (error) {
     console.log("error");
   }
 };
 
-
-module.exports = { register, login, getUser ,searchUser };
+module.exports = { register, login, getUser, searchUser };
