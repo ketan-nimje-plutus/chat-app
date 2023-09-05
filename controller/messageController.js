@@ -2,13 +2,16 @@ const messageModel = require("../Models/messageModel");
 
 const sendMessage = async (req, res) => {
   // const data = await messageModel.deleteMany();
+
   const { from, to, message, msg_type } = req.body;
+
   if (!from || !to) {
     return res.json({
       status: 0,
       message: "all fields are require",
     });
   }
+
   try {
     const data = await messageModel.create({
       text: message ? message : "",
@@ -71,6 +74,7 @@ const sendImage = async (req, res) => {
     console.log(err);
   }
 };
+
 const getAllMessage = async (req, res) => {
   try {
     const { from, to } = req.body;
