@@ -22,7 +22,9 @@ const port = process.env.PORT || 5000;
 const dbURL = process.env.ATLAS_URL;
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: '*'
+}));
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/public", express.static("public"));
@@ -52,7 +54,6 @@ io.on("connection", (socket) => {
 
   socket.on("add-user", async (newuserID) => {
     await userModel.findOneAndUpdate({ _id: newuserID.toString() }, { socketid: socket.id });
-    console.log("hi", "add-user");
     if (!onlineUser.some((user) => user.userID == newuserID)) {
       onlineUser.push({
         userID: newuserID,
