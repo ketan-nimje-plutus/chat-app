@@ -40,51 +40,110 @@ const register = async (req, res) => {
   });
 };
 
-const login = async (req, res) => {
-  const { email, password } = req.body;
+// const login = async (req, res) => {
+//   const { email, password } = req.body;
 
-  if (!email || !password) {
+//   if (!email || !password) {
+//     return res.json({
+//       status: 0,
+//       message: "all fildes are required.",
+//     });
+//   }
+//   const existUser = await userModel.findOne({ email });
+//   if (!existUser) {
+//     return res.json({
+//       status: 0,
+//       message: "user does not exist with this email",
+//     });
+//   }
+//   bcrypt.compare(password, existUser.password, (err, result) => {
+//     if (err) {
+//       return res.json({
+//         status: 0,
+//         message: "Something Wrong occured",
+//       });
+//     }
+//     if (!result) {
+//       return res.json({
+//         status: 0,
+//         message: "Invalid Password ! ",
+//       });
+//     }
+//     const payload = {
+//       id: existUser._id,
+//       name: existUser.name,
+//       email: existUser.email,
+//       password: existUser.password,
+//     };
+
+//     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
+
+//     return res.json({
+//       status: 1,
+//       message: "login sucessfully",
+//       token: token,
+//       user: payload,
+//     });
+//   });
+// };
+const login = async (req, res) => {
+  const { fullName, email, contactNumber } = req.body;
+  if (!fullName || !email || !contactNumber) {
     return res.json({
       status: 0,
-      message: "all fildes are required.",
+      message: "all fields are required.",
+    });
+  }
+  if (!validator.isEmail(email)) {
+    return res.json({
+      status: 0,
+      message: "invalid email",
     });
   }
   const existUser = await userModel.findOne({ email });
-  if (!existUser) {
-    return res.json({
-      status: 0,
-      message: "user does not exist with this email",
-    });
-  }
-  bcrypt.compare(password, existUser.password, (err, result) => {
-    if (err) {
-      return res.json({
-        status: 0,
-        message: "Something Wrong occured",
-      });
-    }
-    if (!result) {
-      return res.json({
-        status: 0,
-        message: "Invalid Password ! ",
-      });
-    }
+  if (existUser) {
     const payload = {
       id: existUser._id,
-      name: existUser.name,
+      fullName: existUser.fullName,
       email: existUser.email,
-      password: existUser.password,
+      contactNumber: existUser.contactNumber,
     };
 
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
 
     return res.json({
       status: 1,
-      message: "login sucessfully",
+      message: "login successfully",
       token: token,
       user: payload,
     });
+
+  }
+  const payload = {
+    // _id: userModel._id, // You don't need this line
+    // Include other properties you need in the payload
+    fullName: fullName,
+    email: email,
+    contactNumber: contactNumber,
+  };
+
+  const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
+  const user = new userModel(payload); // Pass payload as an object
+
+  await user.save();
+
+  res.json({
+    status: 1,
+    message: "Done",
+    User: user,
+    Token: token,
   });
+  console.log({
+    status: 1,
+    message: "Done",
+    User: user,
+    Token: token,
+  },'done')
 };
 
 const getUser = async (req, res) => {

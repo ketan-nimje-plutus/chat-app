@@ -31,7 +31,7 @@ app.use("/public", express.static("public"));
 
 const connectToDatabase = async () => {
   try {
-    await mongoose.connect(dbURL, {
+    await mongoose.connect('mongodb+srv://pooja:mongodb@cluster0.bhzq7xi.mongodb.net/chat-app', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
