@@ -28,19 +28,20 @@ app.use(cors({
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/public", express.static("public"));
+const DB = require('./database/database')
 
-const connectToDatabase = async () => {
-  try {
-    await mongoose.connect('mongodb+srv://pooja:mongodb@cluster0.bhzq7xi.mongodb.net/chat-app', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("Connected successfully");
-  } catch (error) {
-    console.log("Database not connected", error);
-  }
-};
-connectToDatabase();
+// const connectToDatabase = async () => {
+//   try {
+//     await mongoose.connect('mongodb://localhost:27017/chatapp', {
+//       useNewUrlParser: true,
+//       useUnifiedTopology: true,
+//     });
+//     console.log("Connected successfully");
+//   } catch (error) {
+//     console.log("Database not connected", error);
+//   }
+// };
+// connectToDatabase();
 
 let onlineUser = [];
 

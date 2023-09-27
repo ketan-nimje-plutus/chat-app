@@ -4,8 +4,8 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) {
+  const { fullName, email, contactNumber } = req.body;
+  if (!fullName || !email || !contactNumber) {
     return res.json({
       status: 0,
       message: "all fildes are required.",
@@ -24,14 +24,14 @@ const register = async (req, res) => {
       message: "user Already exist...",
     });
   }
-  if (!validator.isStrongPassword(password)) {
-    return res.json({
-      status: 0,
-      message: "storng password required",
-    });
-  }
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new userModel({ name, email, password: hashedPassword, socketid: '' });
+  // if (!validator.isStrongPassword(password)) {
+  //   return res.json({
+  //     status: 0,
+  //     message: "storng password required",
+  //   });
+  // }
+  // const hashedPassword = await bcrypt.hash(password, 10);
+  const user = new userModel({ fullName, email, contactNumber, socketid: '',role:"BD"});
   await user.save();
 
   res.json({
@@ -40,7 +40,6 @@ const register = async (req, res) => {
   });
 };
 
-// const login = async (req, res) => {
 //   const { email, password } = req.body;
 
 //   if (!email || !password) {
@@ -107,6 +106,7 @@ const login = async (req, res) => {
       fullName: existUser.fullName,
       email: existUser.email,
       contactNumber: existUser.contactNumber,
+      role:existUser.role
     };
 
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
@@ -125,6 +125,7 @@ const login = async (req, res) => {
     fullName: fullName,
     email: email,
     contactNumber: contactNumber,
+    role:""
   };
 
   const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
@@ -138,12 +139,6 @@ const login = async (req, res) => {
     User: user,
     Token: token,
   });
-  console.log({
-    status: 1,
-    message: "Done",
-    User: user,
-    Token: token,
-  },'done')
 };
 
 const getUser = async (req, res) => {

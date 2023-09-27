@@ -25,6 +25,9 @@ const userSchema = new mongoose.Schema(
       required: false,
       maxlength: 2000,
     },
+    role: {
+      type: String,
+    },
   },
   {
     timestamps: true,
