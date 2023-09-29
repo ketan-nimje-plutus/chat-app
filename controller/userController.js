@@ -183,4 +183,53 @@ const searchUser = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getUser, searchUser };
+
+const CreateClient = async (req, res) => {
+  const { name, email, contactNumber } = req.body;
+
+  if (!name || !email || !contactNumber) {
+    return res.json({
+      status: 0,
+      message: "All fields are required.",
+    });
+  }
+  const existingUser = await userModel.findOne({ email });
+  if (existingUser) {
+    existingUser.name = name;
+    existingUser.contactNumber = contactNumber;
+    const newToken = jwt.sign({ email: existingUser.email },process.env.JWT_KEY, { expiresIn: "7d" });
+    existingUser.token = newToken; 
+    await existingUser.save();
+
+    return res.json({
+      status: 1,
+      message: "User data updated, JWT token refreshed",
+      token: newToken,
+      data:existingUser
+    });
+  } else {
+    const user = new userModel({ name, email, contactNumber, socketid: '' });
+    const token = jwt.sign({ email }, process.env.JWT_KEY, { expiresIn: "7d" })
+    user.token = token;
+
+    await user.save();
+
+    return res.json({
+      status: 1,
+      message: "User created",
+      token,
+      user,
+    });
+  }
+};
+
+const getUserByID = async (req, res) => {
+  const id = req.body.id
+  const users = await userModel.find({_id:id});
+  return res.json({
+    status: 1,
+    users: users,
+  });
+};
+
+module.exports = { register, login, getUser, searchUser, CreateClient ,getUserByID};

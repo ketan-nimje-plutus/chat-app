@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
     },
     contactNumber: {
       type: String,
-      required: true,
+      // required: true,
       minlength: 3,
       maxlength: 2000,
     },
@@ -25,8 +25,10 @@ const userSchema = new mongoose.Schema(
       required: false,
       maxlength: 2000,
     },
-    role: {
-      type: String,
+    contactNumber: {
+      type: Number,
+      required: false,
+      maxlength: 2000,
     },
   },
   {

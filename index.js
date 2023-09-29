@@ -19,7 +19,7 @@ const io = new Server(httpServer, {
 });
 
 const port = process.env.PORT || 5000;
-const dbURL = process.env.ATLAS_URL;
+const dbURL = process.env.DB_URL;
 
 app.use(express.json());
 app.use(cors({
@@ -50,7 +50,7 @@ io.on("connection", (socket) => {
   socket.on('login', async (data) => {
     console.log("socket ID", socket.id, data)
     // `doc` is the document _before_ `update` was applied
-    await userModel.findOneAndUpdate({ _id: data.toString() }, { socketid: socket.id });
+    await userModel.findOneAndUpdate({ _id: data?.toString() }, { socketid: socket.id });
   });
 
   socket.on("add-user", async (newuserID) => {

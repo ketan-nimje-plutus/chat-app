@@ -147,6 +147,35 @@ const changeStatus = async (req, res) => {
     console.log("error", err);
   }
 };
+const getAllUserMessage = async (req, res) => {
+  try {
+    const {id} = req.body;
+    const data = await messageModel.find({
+      $or: [
+        { $and: [{ to: id}] },
+        { $and: [{ from: id}] },
+      ],
+    });
+    const projectMsg = data.map((msg) => {
+      return {
+        fromSelf: msg.from.toString() === id,
+        message: msg.text,
+        msg_type: msg.msg_type,
+        attechment: msg.attechment,
+        createdAt: msg.createdAt,
+        attechment: msg.attechment,
+        from:msg.from,
+        to:msg.to  
+      };
+    });
+    return res.json({
+      status: 1,
+      message: projectMsg,
+    });
+  } catch (error) {
+    console.log("error", error);
+  }
+};
 
 module.exports = {
   sendMessage,
@@ -154,4 +183,5 @@ module.exports = {
   viewMessage,
   changeStatus,
   sendImage,
+  getAllUserMessage
 };
