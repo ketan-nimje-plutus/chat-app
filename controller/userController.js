@@ -4,8 +4,8 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
-  const { fullName, email, contactNumber } = req.body;
-  if (!fullName || !email || !contactNumber) {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
     return res.json({
       status: 0,
       message: "all fildes are required.",
@@ -24,14 +24,14 @@ const register = async (req, res) => {
       message: "user Already exist...",
     });
   }
-  // if (!validator.isStrongPassword(password)) {
-  //   return res.json({
-  //     status: 0,
-  //     message: "storng password required",
-  //   });
-  // }
-  // const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new userModel({ fullName, email, contactNumber, socketid: '',role:"BD"});
+  if (!validator.isStrongPassword(password)) {
+    return res.json({
+      status: 0,
+      message: "storng password required",
+    });
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = new userModel({ name, email, password: hashedPassword, socketid: '' });
   await user.save();
 
   res.json({
@@ -86,58 +86,49 @@ const register = async (req, res) => {
 //   });
 // };
 const login = async (req, res) => {
-  const { fullName, email, contactNumber } = req.body;
-  if (!fullName || !email || !contactNumber) {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
     return res.json({
       status: 0,
-      message: "all fields are required.",
-    });
-  }
-  if (!validator.isEmail(email)) {
-    return res.json({
-      status: 0,
-      message: "invalid email",
+      message: "all fildes are required.",
     });
   }
   const existUser = await userModel.findOne({ email });
-  if (existUser) {
+  if (!existUser) {
+    return res.json({
+      status: 0,
+      message: "user does not exist with this email",
+    });
+  }
+  bcrypt.compare(password, existUser.password, (err, result) => {
+    if (err) {
+      return res.json({
+        status: 0,
+        message: "Something Wrong occured",
+      });
+    }
+    if (!result) {
+      return res.json({
+        status: 0,
+        message: "Invalid Password ! ",
+      });
+    }
     const payload = {
       id: existUser._id,
-      fullName: existUser.fullName,
+      name: existUser.name,
       email: existUser.email,
-      contactNumber: existUser.contactNumber,
-      role:existUser.role
+      password: existUser.password,
     };
 
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
 
     return res.json({
       status: 1,
-      message: "login successfully",
+      message: "login sucessfully",
       token: token,
       user: payload,
     });
-
-  }
-  const payload = {
-    // _id: userModel._id, // You don't need this line
-    // Include other properties you need in the payload
-    fullName: fullName,
-    email: email,
-    contactNumber: contactNumber,
-    role:""
-  };
-
-  const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
-  const user = new userModel(payload); // Pass payload as an object
-
-  await user.save();
-
-  res.json({
-    status: 1,
-    message: "Done",
-    User: user,
-    Token: token,
   });
 };
 
