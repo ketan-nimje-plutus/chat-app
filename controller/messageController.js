@@ -84,7 +84,9 @@ const getAllMessage = async (req, res) => {
         { $and: [{ to: from, from: to }] },
       ],
     });
+    console.log(data,'data')
     const projectMsg = data.map((msg) => {
+      console.log(msg,'msg')
       return {
         fromSelf: msg.from.toString() === from,
         message: msg.text,
@@ -92,6 +94,8 @@ const getAllMessage = async (req, res) => {
         attechment: msg.attechment,
         createdAt: msg.createdAt,
         attechment: msg.attechment,
+        from:msg.from,
+        to:msg.to  
       };
     });
     return res.json({
