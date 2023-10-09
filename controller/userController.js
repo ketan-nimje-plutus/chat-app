@@ -2,6 +2,7 @@ const userModel = require("../Models/userModel");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -40,51 +41,6 @@ const register = async (req, res) => {
   });
 };
 
-//   const { email, password } = req.body;
-
-//   if (!email || !password) {
-//     return res.json({
-//       status: 0,
-//       message: "all fildes are required.",
-//     });
-//   }
-//   const existUser = await userModel.findOne({ email });
-//   if (!existUser) {
-//     return res.json({
-//       status: 0,
-//       message: "user does not exist with this email",
-//     });
-//   }
-//   bcrypt.compare(password, existUser.password, (err, result) => {
-//     if (err) {
-//       return res.json({
-//         status: 0,
-//         message: "Something Wrong occured",
-//       });
-//     }
-//     if (!result) {
-//       return res.json({
-//         status: 0,
-//         message: "Invalid Password ! ",
-//       });
-//     }
-//     const payload = {
-//       id: existUser._id,
-//       name: existUser.name,
-//       email: existUser.email,
-//       password: existUser.password,
-//     };
-
-//     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: "7d" });
-
-//     return res.json({
-//       status: 1,
-//       message: "login sucessfully",
-//       token: token,
-//       user: payload,
-//     });
-//   });
-// };
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -174,7 +130,6 @@ const searchUser = async (req, res) => {
   }
 };
 
-
 const CreateClient = async (req, res) => {
   const { name, email, contactNumber } = req.body;
 
@@ -188,15 +143,15 @@ const CreateClient = async (req, res) => {
   if (existingUser) {
     existingUser.name = name;
     existingUser.contactNumber = contactNumber;
-    const newToken = jwt.sign({ email: existingUser.email },process.env.JWT_KEY, { expiresIn: "7d" });
-    existingUser.token = newToken; 
+    const newToken = jwt.sign({ email: existingUser.email }, process.env.JWT_KEY, { expiresIn: "7d" });
+    existingUser.token = newToken;
     await existingUser.save();
 
     return res.json({
       status: 1,
       message: "User data updated, JWT token refreshed",
       token: newToken,
-      data:existingUser
+      data: existingUser
     });
   } else {
     const user = new userModel({ name, email, contactNumber, socketid: '' });
@@ -216,11 +171,38 @@ const CreateClient = async (req, res) => {
 
 const getUserByID = async (req, res) => {
   const id = req.body.id
-  const users = await userModel.find({_id:id});
+  const users = await userModel.find({ _id: id });
   return res.json({
     status: 1,
     users: users,
   });
 };
 
-module.exports = { register, login, getUser, searchUser, CreateClient ,getUserByID};
+const SendMail = async (req, res) => {
+  try {
+    const { name, email, contact, message } = req.body;
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail', // You can use other email services or SMTP details here
+      auth: {
+        user: 'your_email@gmail.com',
+        pass: 'your_email_password',
+      },
+    });
+    const mailOptions = {
+      from: 'your_email@gmail.com',
+      to: 'recipient_email@example.com',
+      subject: 'Message from Your Website', 
+      text: `Name: ${name}\nEmail: ${email}\nContact: ${contact}\nMessage: ${message}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ message: 'Email sending failed' });
+  }
+};
+
+
+
+module.exports = { register, login, getUser, searchUser, CreateClient, getUserByID ,SendMail};
